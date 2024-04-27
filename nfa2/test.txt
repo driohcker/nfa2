@@ -1,5 +1,5 @@
 int main() {
-    string filename="test.txt";
+    string filename = "test.txt";
     //getline(cin, filename);
 
     ifstream inputFile(filename);
