@@ -1,0 +1,17 @@
+int main() {
+    string filename="test.txt";
+    //getline(cin, filename);
+
+    ifstream inputFile(filename);
+    if (!inputFile.is_open()) {
+        cout << "open file error" << endl;
+        return 1;
+    }
+    string line;
+    int n = 1;
+    while (getline(inputFile, line)) {
+        analyzeLine(line,n);
+        n++;
+    }
+    inputFile.close();
+}
