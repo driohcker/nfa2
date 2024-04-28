@@ -53,7 +53,15 @@ bool ifNumble(char c) {
     if (c >= '0' && c <= '9')return true;
     else return false;
 }
-
+//解释类型
+string getType_Chinese(int code, int no) {
+    if (code == 0)return "\033[31;1m无法识别的字符,错误在第" + to_string(no) + "行\033[0m";
+    else if (code == 1)return "标识符";
+    else if (code == 2)return "常数";
+    else if (code < 7)return "运算符";
+    else if (code < 16)return "分隔符";
+    else return "关键字";
+}
 // 词法分析器类
 class Lexer {
 public:
@@ -73,11 +81,11 @@ public:
 
         char currentChar = input[position];
 
-        if (isSignword(currentChar)) {//非自定义
+        if (isSignword(currentChar)) {
             // 识别标识符
             return getIdentifier();
         }
-        else if (isdigit(currentChar)) {//非自定义
+        else if (isDigit(currentChar)) {//非自定义
             // 识别常数
             return getConstant();
         }
@@ -119,7 +127,7 @@ private:
         return separators.find(c) != string::npos;
     }
 
-    //检查是否为标识符(未完成)
+    //检查是否为标识符
     bool isSignword(char c) {
         int n = 0;
         
@@ -137,6 +145,27 @@ private:
         }else return false;
     }
     
+    //检查是否为常数
+    bool isDigit(char c) {
+        int n = 0;
+        int dot = 1;
+        if (ifNumble(c)) {
+            position++;
+            n++;
+
+            while (ifNumble(input[position])) {
+                if (input[position+1] == '.' && ifNumble(input[position + 2]) && dot == 1) {
+                    dot--;
+                    position++;
+                    n++;
+                }
+                position++;
+                n++;
+            }
+            position = position - n;
+            return true;
+        }else return false;
+    }
     // 获取标识符后进行再判断是否为关键字
     Token getIdentifier() {
         string lexeme = "";
@@ -174,7 +203,13 @@ private:
     // 获取常数
     Token getConstant() {
         string lexeme = "";
+        int dot = 1;
         while (position < input.size() && isdigit(input[position])) {
+            if (input[position + 1] == '.' && ifNumble(input[position + 2]) && dot == 1) {
+                dot--;
+                position++;
+                lexeme += input[position - 1];
+            }
             lexeme += input[position];
             position++;
         }
@@ -232,14 +267,7 @@ private:
     }
 
 };
-string getType_Chinese(int code,int no) {
-    if (code == 0)return "\033[31;1m无法识别的字符,错误在第" + to_string(no) + "行\033[0m";
-    else if (code == 1)return "标识符";
-    else if (code == 2)return "常数";
-    else if (code < 7)return "运算符";
-    else if (code < 16)return "分隔符";
-    else return "关键字";
-}
+
 //分析每行
 void analyzeLine(const string& line , int no) {
     Lexer lexer(line);
